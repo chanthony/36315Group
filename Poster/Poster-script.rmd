@@ -22,7 +22,7 @@ df$total_price <- df$UnitPrice * df$Quantity
 
 ```{r remove_non_european}
 #ONLY RUN IF YOU ONLY WANT EUROPEAN COUNTRIES
-non_european <- c("Australia", "Bahrain", "Brazil", "Canada", "Hong Kong",
+non_european <- c("Australia", "Bahrain", "Brazil", "Canada", "Hong Kong", "Israel", "Lebanon",
                   "Japan", "RSA", "Saudi Arabia", "Singapore", "United Arab Emirates",
                   "Unspecified", "USA")
 
