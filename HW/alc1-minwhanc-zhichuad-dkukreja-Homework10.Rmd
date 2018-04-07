@@ -1,6 +1,6 @@
 ---
 title: "36-315 Homework 10, Spring 2018"
-author: "[Names and Andrew IDs of all members of your Group]"
+author: "Anthony Chan(alc1), Minwhan cho(minwhanc), Zhichuan Duan(zhichuad), Devansh Kukreja(dkukreja)"
 date: "Due Wednesday, April 18, 2018 (11:59pm) on Canvas"
 output: 
   html_document:
@@ -31,25 +31,11 @@ output:
 
 # Problem 0
 
-**Administrative checklist**
-
-*Please remember to take care of the following things not to lose points in your submission:*
-
-* *Put brief but informative titles, labels, etc. on each graph*
-* *Submit **both** .html and .Rmd file*
-* *Check that you submitted the right files (this assignment & this class)*
-* *If you embed an image locally, submit that image as well with the same name you use in the .Rmd file*
-
-*Keep just one:*
-
-* "We used Google's R style guide."
 * "We used Hadley Wickham's R style guide."
 
 *Keep just those that apply, and fill in details as needed:*
 
-* "This submission is for the following group: ______[list names and AndrewIDs]______
-* "We worked with _____[list names]_____ on this assignment, outside of the member of this group."
-* "We received assistance from _____[list campus resource(s)]_____ on this assignment."
+* "This submission is for the following group: Anthony Chan(alc1), Minwhan cho(minwhanc), Zhichuan Duan(zhichuad), Devansh Kukreja(dkukreja)
 
 ***
 ***
@@ -72,6 +58,8 @@ love_adjacency <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/da
 
 c. *(5 points)  Read about the `ggraph` package [here](http://www.data-imaginist.com/2017/Announcing-ggraph/).  What does it do?  What `ggplot()`-like function can you use with `ggraph`?*  
 
+ggraph() functions similarly to ggplot() in initializing a plot
+
 d. *(15 points)  Create a basic network diagram of the _Love Actually_ data using the `ggraph` package and looking at the code in the article posted in part (c) above. Below we define the vector of actor names, `actor_names`, and the graph object, `LA_graph`. Take into consideration the following for building the visualization:*
 
 + *The `LA_graph` object needs to be used in the `ggraph()` function* 
@@ -81,7 +69,7 @@ d. *(15 points)  Create a basic network diagram of the _Love Actually_ data usin
 + *If the actor names are too big, you can format them using the `size` argument in `geom_node_label()`*
 + *Remove tick marks for both the x and y axis* 
 
-```{r, warning = FALSE, message = FALSE}
+```{r, warning = FALSE, message = FALSE, fig.width = 13}
 #install.packages('igraph')
 #install.packages('ggraph')
 library(igraph)
@@ -89,6 +77,11 @@ library(ggraph)
 
 actor_names <- love_adjacency[,1]
 LA_graph <- graph_from_adjacency_matrix(as.dist(love_adjacency[,-1]))
+
+ggraph(LA_graph, layout = 'kk') +
+  geom_edge_link() +
+  geom_node_label(aes(label = actor_names), size = 4) +
+  theme_graph()
 ```
 
 e. *(15 points)  Repeat part (d), but now:*
@@ -97,9 +90,15 @@ e. *(15 points)  Repeat part (d), but now:*
 * *Change the `range` argument of `scale_edge_width()` so that the thinnest edges have width 0.5 and the thickest have width 3.*
 * *Use another layout of your choice. See the help file for `layout_igraph_auto` which lists other layout options besides `kk`.*
 
-```{r}
+```{r, fig.width = 10}
 LA_graph_weighted <- graph_from_adjacency_matrix(as.matrix(love_adjacency[,-1]),
                                         weighted = TRUE)
+
+ggraph(LA_graph_weighted, layout = 'circle') +
+  geom_edge_link(aes(edge_width = weight)) +
+  geom_node_label(aes(label = actor_names), size = 2.8) +
+  scale_edge_width(range = c(0.5,3)) +
+  theme_graph()
 ```
 
 
@@ -131,8 +130,17 @@ bike <- mutate(bike,
                start_date = as.Date(starttime, format = "%m/%d/%Y"))
 ```
 
+```{r}
+min(bike$start_date)
+max(bike$start_date)
+```
+
 +  *How many rows and columns are in the result?*  
 +  *What are the minimum and maximum bike trip dates?*
+
+bike has 4359 rows and 17 columns.
+
+The earliest bike trip was June 1st and the latest was June 30th
 
 b. *(15 points).  Let's plot the number of trips over time.  First, we need to calculate the number of trips on any given day.  This is easy with the `dplyr` package.  Using the code below, we now have a new data frame (called `trips_per_day`).  We can use it to create a nice time series plot with `ggplot()`, `geom_line()`, and `scale_x_date()` to properly format the x-axis:*
 
@@ -140,15 +148,22 @@ b. *(15 points).  Let's plot the number of trips over time.  First, we need to c
 #  Summarize bike, creating a new data.frame that includes the number 
 #  of trips taken on each day
 
-#trips_per_day <- bike %>%
-#  group_by(start_date) %>%
-#  summarize(n_trips = n())
+trips_per_day <- bike %>%
+  group_by(start_date) %>%
+  summarize(n_trips = n())
 
 #  Create a time series plot with the dates on the x-axis and the number of
 #  trips per day on the y-axis
 
-#ggplot(trips_per_day, aes(x = start_date, y = n_trips)) + geom_line() + 
-#  scale_x_date()
+ggplot(trips_per_day, aes(x = start_date, y = n_trips)) + 
+  geom_line() + 
+  scale_x_date(date_breaks = "1 week", date_labels = "%B %d") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Bike Trips Per Day",
+    x = "Date",
+    y = "Number of Trips"
+  )
 ```
 
 *Add the following to the plot above:*
@@ -164,15 +179,22 @@ c. *(5 points)  Repeat part (b), but this time, split the time series into subsc
 ```{r, warning = FALSE, message = FALSE}
 #  Summarize bike, creating a new data.frame that includes the number 
 #  of trips taken on each day, split by usertype
-#trips_per_day_usertype <- bike %>%
-#  group_by(start_date, usertype) %>%
-#  summarize(n_trips = n())
+trips_per_day_usertype <- bike %>%
+  group_by(start_date, usertype) %>%
+  summarize(n_trips = n())
 
 #  Create a time series plot with the dates on the x-axis and the number of
 #  trips per day on the y-axis, split by usertype
 
-#ggplot(trips_per_day_usertype, aes(x = start_date, y = n_trips, color = usertype)) + 
-#  geom_line() + scale_x_date()
+ggplot(trips_per_day_usertype, aes(x = start_date, y = n_trips, color = usertype)) + 
+  geom_line() +   
+  scale_x_date(date_breaks = "1 week", date_labels = "%B %d") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Bike Trips Per Day By Usertype",
+    x = "Date",
+    y = "Number of Trips"
+  )
 ```
 
 *Again, as in part (b), add the following to the plot above:*
@@ -184,6 +206,8 @@ c. *(5 points)  Repeat part (b), but this time, split the time series into subsc
 
 *Which time series appears to have more fluctuation / variability? The customers or the subscribers? Does this make sense, considering that "subscribers" are annual members while "customers" are those who just bought a 24-hour or 3-day pass?*
 
+It appears that customers have more fluctuation which makes sense since customers tend to use bikes in response to events/circumstances rather than on some sort of schedule.
+
 d. *(15 points) As you have seen in class, the function `stat_rollapplyr()` of the package `ggseas` can compute moving average trend lines for a time series.*
 
 *Following the Lecture 19 notes, give arguments to `stat_rollapplyr()` to compute a moving average with a 7-day window, right-aligned. Also make the moving-average trend lines thicker than the underlying data trend lines.*
@@ -192,9 +216,16 @@ d. *(15 points) As you have seen in class, the function `stat_rollapplyr()` of t
 #install.packages('ggseas')
 library(ggseas)
 
-#ggplot(trips_per_day_usertype, aes(x = start_date, y = n_trips, color = usertype)) + 
-#  geom_line() + scale_x_date() +
-#  stat_rollapplyr()
+ggplot(trips_per_day_usertype, aes(x = start_date, y = n_trips, color = usertype)) + 
+  geom_line() + 
+  stat_rollapplyr(width = 7, align = "right", size = 2) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%B %d") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Bike Trips Per Day By Usertype with Rolling Average",
+    x = "Date",
+    y = "Number of Trips"
+  )
 ```
 
 *Again, as in parts (b-c), add the following to the plot above:*
@@ -205,6 +236,8 @@ library(ggseas)
 + *Tilt the x ticks marks by 45 degrees for better legibility*
 
 *Which time series' **moving average** appears to have more fluctuation / variability?*
+
+The customer moving average appears to have more fluctuation.
 
 ***
 ***
@@ -218,9 +251,19 @@ library(ggseas)
 
 a. *(5 points)  Autocorrelations are just the correlation of a time series with itself at different lags.  Let's start by looking at a totally random, made up time series:  `rand_ts <- rnorm(1000)`.  This is just a bunch of random numbers from a Normal(0, 1) distribution.  Use `acf(rand_ts, plot = FALSE)` to look at the correlation of the "time series" and itself at different lags.  Since this "time series" is just 1000 random draws from a Normal(0, 1) distribution, most of the autocorrelations should be near zero.*
 
+```{r}
+rand_ts <- rnorm(1000)
+
+acf(rand_ts, plot = FALSE)
+```
+
 +  *Is this true?*  
 +  *Which autocorrelation is NOT near zero?*  
 +  *Does this make sense?  Why or why not?*
+
++ yes
++ With lag 0, the correlation is 1
++ This makes sense since the data is just being compared to itself and data correlated with itself always has correlation 1.
 
 b. *(5 points) Autocorrelation plots show the correlation between the time series and itself at all of the different possible lags.  The (auto)correlations are plotted on the y-axis, and the lags are shown on the x-axis.  Create an autocorrelation plot of the random time series from (a), using base R graphics.  To do this, just type `acf(rand_ts, plot = TRUE)`.  In the resulting plot, the blue dotted lines indicate statistical significance.  Any correlation above the positive blue line or below the negative blue line is significantly different from zero.*
 
@@ -228,25 +271,50 @@ b. *(5 points) Autocorrelation plots show the correlation between the time serie
 +  *Does this make sense?  Why or why not?*
 
 
+```{r}
+acf(rand_ts, plot = TRUE)
+```
+
+The correlations at 24 and 28 are marginally below the blue line indicating a statistically significant difference. This doesn't make sense as in theory there should be no patterns but this probably happened as a result of the random nature of the datga.
+
 c. *(10 points)  Create two autocorrelation plots of the `trips_per_day_usertype` time series:  One for subscribers, and one for customers. First, we create the two autocorrelation time series.*
 
 ```{r, warning = FALSE, message = FALSE}
-#bike_customer_acf <- acf(filter(trips_per_day_usertype,
-#                                usertype == "Customer")$n_trips,
-#                         plot = FALSE)
-#bike_subsciber_acf <- acf(filter(trips_per_day_usertype,
-#                                 usertype == "Subscriber")$n_trips,
-#                          plot = FALSE)
+bike_customer_acf <- acf(filter(trips_per_day_usertype,
+                                usertype == "Customer")$n_trips,
+                         plot = FALSE)
+bike_subsciber_acf <- acf(filter(trips_per_day_usertype,
+                                 usertype == "Subscriber")$n_trips,
+                          plot = FALSE)
 ```
 
 *And then we generate the both of them using ggplot. Here below we only generate the plot for the customer auto correlation function.*
 
 ```{r}
-#bike_customer_acf_df <- with(bike_customer_acf, data.frame(lag,acf))
-#ggplot(bike_customer_acf_df, aes(x = lag, y= acf)) + geom_col()
+bike_customer_acf_df <- with(bike_customer_acf, data.frame(lag,acf))
+ggplot(bike_customer_acf_df, aes(x = lag, y= acf)) + 
+  geom_col() +
+  labs(
+    y = "Autocorrelation",
+    title = "Autocorrelation in Subscribers",
+    x = "lag(days)",
+    caption = "source: CitiBike TripHistories Data Set"
+  )
 ```
 
 *Generate the autocorrelation plot for the subscribers as well.*
+
+```{r}
+bike_subsciber_acf_df <- with(bike_subsciber_acf, data.frame(lag, acf))
+ggplot(bike_subsciber_acf_df, aes(x = lag, y = acf)) +
+  geom_col() +
+  labs(
+    title = "Autocorrelation in Customers",
+    y = "Autocorrelation",
+    x = "Lag(days)",
+    caption = "Source: CitBike Trip Histories Data Set"
+  )
+```
 
 *Add to **both** plots*:
 
@@ -255,6 +323,8 @@ c. *(10 points)  Create two autocorrelation plots of the `trips_per_day_usertype
 + *Appropriate axis labels*
 
 *In both time series, you should see that the ACF has its greatest peak at `lag=7`. How do you interpret this, considering that we computed the ACFs on daily-level data? Does it make sense, given the context of the data (number of rental bike trips per day)?*
+
+lag=7 is a lag period of 7 days which indicates to us that bike usage runs on a weekly cycle and so on the same day of the week users tend to follow the same patterns.
 
 ***
 ***
