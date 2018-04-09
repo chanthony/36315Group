@@ -33,6 +33,11 @@ df$Country <- factor(df$Country)
 table(df$Country)
 ```
 
+```{r add_dates}
+df$Dates <- format(as.POSIXct(strptime(df$InvoiceDate,"%m/%d/%Y %H:%M",tz="")) ,format = "%m/%Y")
+
+```
+
 ```{r remove_bulk}
 #RUN IF YOU WANT TO REMOVE BULK ORDERS
 df <- df[df$Quantity <= 50 & df$Quantity >= 0,]
@@ -56,6 +61,9 @@ table(df$Country)
 countries <- names(table(df$Country))
 ```
 
+```{r}
+median(df$Quantity)
+```
 ```{r Q1}
 
 #Generate the data
@@ -73,7 +81,7 @@ mapParams <- mapCountryData(unit_map,
                             xlim = c(-20,30),
                             ylim = c(30,70),
                             catMethod = "pretty",
-                            mapTitle = "Median Unit Price Per Country",
+                            mapTitle = "Median Unit Price Per Country(pounds)",
                             missingCountryCol = "grey",
                             colourPalette = brewer.pal(9, "BuGn"),
                             addLegend = FALSE)
@@ -128,7 +136,7 @@ mapParams <- mapCountryData(total_map,
                             ylim = c(30,70),
                             nameColumnToPlot = "total_spent",
                             catMethod = "pretty",
-                            mapTitle = "Customer Total Spent Per Country",
+                            mapTitle = "Customer Total Spent Per Country(pounds)",
                             missingCountryCol = "grey",
                             colourPalette = brewer.pal(9, "BuGn"),
                             addLegend = FALSE)
@@ -137,4 +145,57 @@ mapParams <- mapCountryData(total_map,
 do.call( addMapLegend, c(mapParams,
                          legendLabels = "all",
                          horizontal = TRUE))
+```
+
+
+```{r}
+date_freq <- function(df){
+  result <- as.data.frame(table(df$Dates)/nrow(df))
+}
+
+country_freqs <- bind_rows(lapply(by_country, FUN = date_freq), .id = "Country") %>%
+  rename(Month = Var1)
+```
+
+```{r, fig.width = 11}
+ggplot(country_freqs, aes(x = Month, y = Freq, fill = Country)) +
+  geom_bar(stat = "identity", position = "identity", alpha = 0.7) +
+  scale_color_brewer(type = "qual", palette = "Paired") +
+  labs(
+    title = "% of Purchases Made for a Given Country per Month",
+    y = "Percentage of Total"
+  )
+```
+
+```{r}
+library(zoo)
+
+country_freqs$Month <- paste(country_freqs$Month, "01", sep = "/")
+
+country_freqs$Month <- as.Date(country_freqs$Month, format = "%m/%Y/%d")
+
+ggplot(country_freqs, aes(x = Month, y = Freq, color = Country)) + 
+  geom_line() +   
+  scale_x_date(date_breaks = "1 month", date_labels = "%m/%Y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "% of Purchases Made for a Given Country per Month",
+    y = "Percentage of Total",
+    x = "Month"
+  )
+```
+
+```{r}
+total_mean <- aggregate(country_freqs$Freq, list(country_freqs$Month), mean)%>%
+  rename(Month = Group.1, Freq = x)
+
+ggplot(total_mean, aes(x = Month, y = Freq)) + 
+  geom_line(colour = "steelblue", size = 2) +   
+  scale_x_date(date_breaks = "1 month", date_labels = "%m/%Y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "% of Purchases Made per Month",
+    y = "Percentage of Total",
+    x = "Month"
+  )
 ```
