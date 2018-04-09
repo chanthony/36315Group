@@ -83,7 +83,7 @@ mapParams <- mapCountryData(unit_map,
                             catMethod = "pretty",
                             mapTitle = "Median Unit Price Per Country(pounds)",
                             missingCountryCol = "grey",
-                            colourPalette = brewer.pal(9, "BuGn"),
+                            colourPalette = brewer.pal(9, "Blues"),
                             addLegend = FALSE)
 
 #customize the legend
@@ -112,7 +112,7 @@ mapParams <- mapCountryData(quant_map,
                             catMethod = "pretty",
                             mapTitle = "Median Quantity Per Country",
                             missingCountryCol = "grey",
-                            colourPalette = brewer.pal(9, "BuGn"),
+                            colourPalette = brewer.pal(9, "Blues"),
                             addLegend = FALSE)
 
 #customize the legend
@@ -138,7 +138,7 @@ mapParams <- mapCountryData(total_map,
                             catMethod = "pretty",
                             mapTitle = "Customer Total Spent Per Country(pounds)",
                             missingCountryCol = "grey",
-                            colourPalette = brewer.pal(9, "BuGn"),
+                            colourPalette = brewer.pal(9, "Blues"),
                             addLegend = FALSE)
 
 #customize the legend
