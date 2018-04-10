@@ -33,8 +33,13 @@ df$Country <- factor(df$Country)
 table(df$Country)
 ```
 
+```{r}
+
+```
+
+
 ```{r add_dates}
-df$Dates <- format(as.POSIXct(strptime(df$InvoiceDate,"%m/%d/%Y %H:%M",tz="")) ,format = "%m/%Y")
+df$Dates <- format(as.POSIXct(strptime(df$InvoiceDate,"%m/%d/%Y %H:%M",tz="")) ,format = "%Y/%m")
 
 ```
 
@@ -198,4 +203,28 @@ ggplot(total_mean, aes(x = Month, y = Freq)) +
     y = "Percentage of Total",
     x = "Month"
   )
+```
+
+```{r, fig.height=8, fig.width = 15}
+country_freqs <- bind_rows(lapply(by_country, FUN = date_freq), .id = "Country") %>%
+  rename(Month = Var1)
+
+countries = c("United_Kingdom","Netherlands","Belgium","EIRE","France","Germany","Portugal","Spain","Switzerland")
+country_freqs <- country_freqs[country_freqs$Country %in% countries,]
+
+mean_country <- aggregate(country_freqs$Freq, list(country_freqs$Month), mean) %>%
+  rename(Month = Group.1, Freq = x)
+
+mean_country$Country <- "Mean"
+
+country_freqs <- rbind(country_freqs, mean_country)
+
+country_freqs$Month <- paste(country_freqs$Month, "01", sep = "/")
+
+country_freqs$Month <- as.Date(country_freqs$Month, format = "%Y/%m/%d")
+
+ggplot(country_freqs, aes(x = Month, y = Freq)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  scale_x_date(date_breaks = "2 month", date_labels = "%b") +
+  facet_wrap(~Country, ncol = 3)
 ```
