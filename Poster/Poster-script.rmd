@@ -126,6 +126,10 @@ do.call( addMapLegend, c(mapParams,
                          horizontal = TRUE))
 ```
 
+```{r}
+
+```
+
 ```{r total_price}
 country_total <- by_country %>%
   lapply(FUN = function(x) sum(x$total_price)/length(unique(x$CustomerID))) %>%
@@ -177,7 +181,7 @@ library(zoo)
 
 country_freqs$Month <- paste(country_freqs$Month, "01", sep = "/")
 
-country_freqs$Month <- as.Date(country_freqs$Month, format = "%m/%Y/%d")
+country_freqs$Month <- as.Date(country_freqs$Month, format = "%Y/%m/%d")
 
 ggplot(country_freqs, aes(x = Month, y = Freq, color = Country)) + 
   geom_line() +   
@@ -197,12 +201,16 @@ total_mean <- aggregate(country_freqs$Freq, list(country_freqs$Month), mean)%>%
 ggplot(total_mean, aes(x = Month, y = Freq)) + 
   geom_line(colour = "steelblue", size = 2) +   
   scale_x_date(date_breaks = "1 month", date_labels = "%m/%Y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 11),
+        axis.text.y = element_text(size = 11),
+        axis.title = element_text(size = 12, face = "bold")) +
   labs(
     title = "% of Purchases Made per Month",
     y = "Percentage of Total",
     x = "Month"
   )
+
+ggsave("mean_plot.jpg", device = "jpeg", path = "./", width = 10, height = 5)
 ```
 
 ```{r, fig.height=8, fig.width = 15}
@@ -226,5 +234,25 @@ country_freqs$Month <- as.Date(country_freqs$Month, format = "%Y/%m/%d")
 ggplot(country_freqs, aes(x = Month, y = Freq)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   scale_x_date(date_breaks = "2 month", date_labels = "%b") +
-  facet_wrap(~Country, ncol = 3)
+  facet_wrap(~Country, ncol = 3) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text.y = element_text(size = 12),
+        strip.text.x = element_text(size = 12, face = "bold"))
+
+ggsave("country_freqs.jpg", device = "jpeg", path = "./", height = 8, width = 15)
 ```
+
+```{r}
+df$day <- weekdays(as.Date(df$InvoiceDate))
+
+df = df[df$UnitPrice >= 0 & df$UnitPrice <= 10,]
+
+df$price_bin <- cut(df$UnitPrice, breaks = c(0,2,6,Inf), labels = c("Low","Middle","High"))
+
+df$total_price <- df$Quantity * df$UnitPrice
+
+df.agg <- aggregate(df$total_price, by=list(df$day, df$price_bin), sum) %>%
+  rename(Weekday = Group.1, price_bin = Group.2, total_spen = x)
+```
+
