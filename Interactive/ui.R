@@ -1,10 +1,17 @@
 library(shiny)
 library(ggplot2)
 library(shinydashboard)
+library(dashboardthemes)
+
+#IF you do not have dashboard themes installed run the following code:
+# library(devtools)
+# install_github("nik01010/dashboardthemes")
+
 
 dataset <- diamonds
 
 dashboardPage(
+  
   dashboardHeader(title = "Caring Tan"),
   dashboardSidebar(
     sidebarMenu(
@@ -14,6 +21,8 @@ dashboardPage(
     )
   ),
   dashboardBody(
+    shinyDashboardThemes(theme = "grey_dark"),
+    
     tabItems(#List of tabs
       tabItem(tabName = "home",#Each tab
               "Sample Landing Page"),
