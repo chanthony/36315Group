@@ -10,15 +10,21 @@ library(dashboardthemes)
 
 dataset <- diamonds
 
+data <- read.csv(file = "drug_consumption.csv", header = TRUE)
+
 dashboardPage(
   
   dashboardHeader(title = "Caring Tan"),
   dashboardSidebar(
+    width = 350,
     sidebarMenu(
       #menuItem(displayed_name, reference_name, icon)
       menuItem("Home", tabName = "home", icon = icon("dashboard")),
       menuItem("Question1", icon = icon("th"),
-        menuSubItem("Plot1.1", tabName = "graph1"))
+        menuSubItem("Plot1.1", tabName = "graph1")),
+      menuItem("How Personality Relates to\n
+               Drug Usage", icon = icon("th"),
+        menuSubItem("Correlation by Drug", tabName = "parallelPlot"))
     )
   ),
   dashboardBody(
@@ -46,6 +52,16 @@ dashboardPage(
                 )
                 ,
                 box(plotOutput('plot'), height = "750px")#The plot name from server.r
+              )
+      ),
+      tabItem(tabName = "parallelPlot",
+              fluidRow(
+                box(
+                  selectInput('focus_drug', 'Drug', colnames(data)[14:32])
+                )
+              ),
+              fluidRow(
+                box(plotOutput('personality_and_drugs'))
               )
       )
     )
