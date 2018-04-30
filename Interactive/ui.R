@@ -17,7 +17,8 @@ dashboardPage(
     sidebarMenu(
       #menuItem(displayed_name, reference_name, icon)
       menuItem("Home", tabName = "home", icon = icon("dashboard")),
-      menuItem("Graph1", tabName = "graph1", icon = icon("th"))
+      menuItem("Question1", icon = icon("th"),
+        menuSubItem("Plot1.1", tabName = "graph1"))
     )
   ),
   dashboardBody(
