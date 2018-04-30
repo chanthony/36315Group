@@ -5,10 +5,12 @@ date: "April 29, 2018"
 output: html_document
 ---
 ```{r}
-data <- read.csv(file = "drug_consumption.csv", header = FALSE)
+data <- read.csv(file = "drug_consumption.csv", header = TRUE)
 ```
 
 ```{r}
+library(plyr)
+
 colnames(data) <- c("ID", "Age", "Gender", "Education", "Country", "Ethnicity", "Neuroticism", "Extraversion",
                     "Openness","Agreeableness", "Cscore", "Impulsiveness", "Sensation Seeing", "Alcohol", "Amphet",
                     "Amyl", "Benzos", "Caff", "Cannabis", "Choc", "Coke", "Ecstasy", "Heroin",
@@ -16,11 +18,48 @@ colnames(data) <- c("ID", "Age", "Gender", "Education", "Country", "Ethnicity", 
 ```
 
 ```{r}
-data$Age <- cut(data$Age, breaks = c(-0.95197, -0.07854, 0.49788, 1.09449, 1.82213, 2.59171), 
-                labels = c("18-24", "25-34", "35-44", "45-54", "55-64", "65+"),
-                include.lowest = FALSE)
+data$Age <- as.factor(mapvalues(data$Age, from = c(-0.95197, -0.07854, 0.49788, 1.09449, 1.82213, 2.59171), 
+                to = c("18-24", "25-34", "35-44", "45-54", "55-64", "65+")))
+
+data$Gender <- as.factor(mapvalues(data$Gender, from = c(0.48246, -0.48246), to = c("Female", "Male")))
+
+data$Education <- as.factor(mapvalues(data$Education, from = c(-2.43591, -1.73790, -1.43719, -1.22751, -0.61113,
+                                                     -0.05921, 0.45468, 1.16365,
+                                                     1.98437),
+                            to = c("<16", "16", "17", "18", "Some College",
+                                   "Trade School", "University Degree", "Masters",
+                                   "PhD")))
+
+data$Country <- as.factor(mapvalues(data$Country, from = c(-0.09765, 0.24923, -0.46841, -0.28519, 0.21128, 0.96082, -0.57009),
+                          to = c("Australia", "Canada", "New Zealand", "Other", "Ireland", "UK", "USA")))
+
+data$Ethnicity <- as.factor(mapvalues(data$Ethnicity, from = c(-0.50212, -1.10702, 1.90725, 0.12600, -0.22166, 0.11440, -0.31685),
+                            to = c("Asian", "Black", "Black/Asian", "White/Asian", "White/Black", "Other", "White")))
+```
+
+```{r Personality}
+#Convert the personality levels to categorical variables
+data$Neuroticism <- as.factor(data$Neuroticism)
+levels(data$Neuroticism) <- 12:60
+data$Neuroticism <- as.numeric(data$Neuroticism)#Make them numeric for regression
+
+data$Extraversion <- as.factor(data$Extraversion)
+levels(data$Extraversion) <- c(16,18:59)
+data$Extraversion <- as.numeric(data$Extraversion)
+
+data$Openness <- as.factor(data$Openness)
+levels(data$Openness) <- c(24,26,28:60)
+data$Openness <- as.numeric(data$Openness)
+
+data$Agreeableness <- as.factor(data$Agreeableness)
+levels(data$Agreeableness) <- c(12,16,18,c(23:60))
+data$Agreeableness <- as.numeric(data$Agreeableness)
+
+data$Cscore <- as.factor(data$Cscore)
+levels(data$Cscore) <- c(17,19,c(20:57),59)
+data$Cscore <- as.numeric(data$Cscore)
 ```
 
 ```{r}
-write.csv(data, "drug_consumption_named.csv")
+write.csv(data, "drug_consumption_named.csv", row.names = FALSE)
 ```
