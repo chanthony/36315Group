@@ -2,6 +2,7 @@ library(shiny)
 library(ggplot2)
 library(shinydashboard)
 library(dashboardthemes)
+library(plotly)
 
 #IF you do not have dashboard themes installed run the following code:
 # library(devtools)
@@ -93,7 +94,8 @@ dashboardPage(
               ),
               fluidRow(
                 box(
-                  plotOutput('rawPersonality')
+                  plotlyOutput('rawPersonality'),
+                  width = 10
                 )
               )
       )

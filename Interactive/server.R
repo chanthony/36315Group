@@ -3,6 +3,7 @@ library(ggplot2)
 library(RCurl)
 library(dplyr)
 library(magrittr)
+library(plotly)
 
 function(input, output) {
   
@@ -12,7 +13,7 @@ function(input, output) {
   
   data <- read.csv(file = "drug_consumption.csv", header = TRUE)
   
-  output$rawPersonality <- renderPlot({
+  output$rawPersonality <- renderPlotly({
     
     used_recently <- c("CL3", "CL4", "CL5", "CL6")
     
@@ -29,16 +30,23 @@ function(input, output) {
                 Agreeableness = median(Agreeableness),
                 Conscientiousness = median(Conscientiousness))
     
+    title_string <- sprintf("%s Scores For Each Drug", input$trait)
+    
     p <- ggplot(drugs_df, aes(x = Drug, y = drugs_df[,input$trait])) +
       #geom_point(alpha = 0.5) +
       geom_jitter(width = 0.2, alpha = 0.2) +
-      geom_point(data = drugs_summary, aes_string(x = 'Drug', y = input$trait, size = '2'),
+      geom_point(data = drugs_summary, aes_string(x = 'Drug', y = input$trait, size = '1.5'),
                  color = 'red') +
       theme(legend.title = element_blank()) +
       scale_size_continuous(breaks = c(2),
-                          labels = c("Median Score"))
+                          labels = c("Median Score")) +
+      labs(
+        x = "Drug",
+        y = "Score",
+        title = title_string
+      )
   
-    p
+    ggplotly(p)
   })
   
   #Change plot name to match plot descrition e.g. output$drug_predicted
