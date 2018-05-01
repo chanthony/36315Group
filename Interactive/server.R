@@ -95,6 +95,110 @@ function(input, output) {
       )
     
     p
+  }, width = 1000, height = 700)
+  
+  output$regression_plot <- renderPlot({
+    #Make a copy of the data
+    temp_data <- data
+    
+    #Convert all the drug factor levels to something we can use
+    levels(temp_data$Alcohol) <- 0:6
+    levels(temp_data$Amphet) <- 0:6
+    levels(temp_data$Amyl) <- 0:6
+    levels(temp_data$Benzos) <- 0:6
+    levels(temp_data$Caff) <- 0:6
+    levels(temp_data$Cannabis) <- 0:6
+    levels(temp_data$Choc) <- 0:6
+    levels(temp_data$Coke) <- 0:6
+    levels(temp_data$Crack) <- 0:6
+    levels(temp_data$Ecstasy) <- 0:6
+    levels(temp_data$Heroin) <- 0:6
+    levels(temp_data$Ketamine) <- 0:6
+    levels(temp_data$Legalh) <- 0:6
+    levels(temp_data$LSD) <- 0:6
+    levels(temp_data$Meth) <- 0:6
+    levels(temp_data$Mushrooms) <- 0:6
+    levels(temp_data$Nicotine) <- 0:6
+    levels(temp_data$Semer) <- 0:6
+    levels(temp_data$VSA) <- 0:6
+    
+    levels(temp_data$Age) <- 0:5
+    levels(temp_data$Gender) <- 0:1
+    levels(temp_data$Education) <- 0:8
+    levels(temp_data$Country) <- 0:6
+    levels(temp_data$Ethnicity) <- 0:6
+    
+    temp_data <- data.frame(lapply(temp_data, FUN = as.numeric))
+    
+    #Extract all the drugs and traits
+    drugs <- colnames(temp_data)[14:32]
+    traits <- colnames(temp_data)[7:10]
+    
+    predicted_df <- data.frame(
+      Drug <- character(),
+      usage <- numeric(),
+      lower <- numeric(),
+      upper <- numeric()
+    )
+    
+    #input <- data.frame(age = '18-24', gender = 'Male', educate = 'Trade School',
+    #                    country = 'Canada', ethnic = 'Asian', neuro = 50, extra = 50, open = 50, cScore = 50, agree = 50)
+    
+    sample_df <- data.frame(Age = input$age,
+                            Gender = input$gender,
+                            Education = input$educate,
+                            Country = input$country,
+                            Ethnicity = input$ethnic,
+                            Neuroticism = input$neuro,
+                            Extraversion = input$extra,
+                            Openness = input$open,
+                            Cscore = input$cScore,
+                            Agreeableness = input$agree)
+    
+    sample_df$Education <- match(sample_df$Education, c(0, 'Some High School', 2, 'High School',
+                                                        'Some University', 'Trade School', 'University Degree',
+                                                        'Masters', 'PhD'))
+    
+    sample_df$Age <- match(sample_df$Age, levels(data$Age))
+    sample_df$Country <- match(sample_df$Country, levels(data$Country))
+    sample_df$Ethnicity <- match(sample_df$Ethnicity, levels(data$Ethnicity))
+    sample_df$Gender <- match(sample_df$Gender, levels(data$Gender))
+    
+    #drug <- 'Alcohol'
+    
+    for(drug in drugs){
+      temp_data$Drug <- temp_data[,drug]
+      reg <- lm(Drug ~ Age + Gender + Education + Country + Ethnicity + 
+                  Neuroticism + Openness + Agreeableness + Cscore + Extraversion,
+                data = temp_data)
+      
+      predicted <- predict(reg, sample_df, interval='confidence')
+      
+      mean <- max(0, min(6, round(predicted[1])))
+      
+      new_entry <- data.frame(Drug = drug, usage = mean, lower = predicted[2], upper = predicted[3])
+      
+      predicted_df <- rbind(predicted_df, new_entry)
+    }
+    
+    p <- ggplot(predicted_df, aes(x = Drug, y = usage)) +
+      geom_bar(stat = "identity", alpha = 0.5) +
+      geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.5) +
+      scale_y_continuous(breaks = 0:6, labels = c('Never', 'Over a Decade Ago', 'In Last Decade',
+                                  'In Last Year', 'In Last Month', 'In Last Week',
+                                  'In Last Day')) +
+      labs(
+        y = 'Predicted Usage',
+        title = 'Predicted Usage by Drug'
+      ) +
+      theme(
+        axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.x = element_text(face = 'bold', size = 14),
+        axis.title.y = element_text(face = 'bold', size = 14)
+      )
+    
+    p
   })
   
 }
