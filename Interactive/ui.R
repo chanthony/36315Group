@@ -21,6 +21,10 @@ dashboardPage(
     sidebarMenu(
       #menuItem(displayed_name, reference_name, icon)
       menuItem("Home", tabName = "home", icon = icon("dashboard")),
+      menuItem("How Demographics Relates to Drug Usage", icon = icon("th"),
+               menuSubItem("How Drugs are Consumed per Education Level",
+                        tabName = "education_drugs")
+      ),
       menuItem("How Personality Relates to\n
                Drug Usage", icon = icon("th"),
         menuSubItem("How Raw Personality Scores Vary by Drug", tabName = 'rawPersonality'),
@@ -94,9 +98,21 @@ dashboardPage(
               ),
               fluidRow(
                 box(
-                  plotlyOutput('rawPersonality'),
+                  plotlyOutput('rawPersonality'),    
                   width = 10
                 )
+              )
+      ),
+      tabItem(tabName = 'education_drugs',
+              fluidRow(
+                box(
+                  selectInput('Education', 'Highest Level of Education Completed', levels(data$Education)),
+                  selectInput('focus_drug', 'Drug', colnames(data)[14:32])
+                )
+              ),
+              
+              box(
+                plotlyOutput('education_and_drugs'), width = 10
               )
       )
     )

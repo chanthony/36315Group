@@ -4,6 +4,7 @@ library(RCurl)
 library(dplyr)
 library(magrittr)
 library(plotly)
+library(plyr)
 
 function(input, output) {
   
@@ -23,29 +24,29 @@ function(input, output) {
     
     colnames(drugs_df)[6] <- "Conscientiousness"
     
-    drugs_summary <- drugs_df %>% group_by(Drug) %>%
-      summarise(Neuroticism =  median(Neuroticism),
-                Extraversion = median(Extraversion),
-                Openness = median(Openness),
-                Agreeableness = median(Agreeableness),
-                Conscientiousness = median(Conscientiousness))
+    
+    drugs_summary <- aggregate(drugs_df[,2:6],list(drugs_df$Drug), median)
+    
+    colnames(drugs_summary)[1] <- 'Drug'
+  
     
     title_string <- sprintf("%s Scores For Each Drug", input$trait)
+  
     
     p <- ggplot(drugs_df, aes(x = Drug, y = drugs_df[,input$trait])) +
-      #geom_point(alpha = 0.5) +
-      geom_jitter(width = 0.2, alpha = 0.2) +
-      geom_point(data = drugs_summary, aes_string(x = 'Drug', y = input$trait, size = '1.5'),
-                 color = 'red') +
-      theme(legend.title = element_blank()) +
-      scale_size_continuous(breaks = c(2),
-                          labels = c("Median Score")) +
-      labs(
-        x = "Drug",
-        y = "Score",
-        title = title_string
-      )
-  
+        #geom_point(alpha = 0.5) +
+        geom_jitter(width = 0.2, alpha = 0.2) +
+        geom_point(data = drugs_summary, aes(x = drugs_summary$Drug, y = drugs_summary[,input$trait], size = 1.5),
+                   color = 'red') +
+        theme(legend.title = element_blank()) +
+        scale_size_continuous(breaks = c(2),
+                            labels = c("Median Score")) +
+        labs(
+          x = "Drug",
+          y = "Score",
+          title = title_string
+        )
+    
     ggplotly(p)
   })
   
@@ -239,6 +240,39 @@ function(input, output) {
       )
     
     p
+  })
+  
+  output$education_and_drugs <- renderPlotly({#Each plot to be rendered in the UI
+    
+    #Make a copy of the data
+    temp_data <- data
+   
+    f <- function(x){
+      mapvalues(x, from = c("CL0", "CL1", "CL2", "CL3", "CL4", "CL5", "CL6"),
+                to = c("Never Used", "Used over a Decade Ago",
+                       "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", "Used in Last Day"),
+                warn_missing = FALSE)
+    }
+    
+    drugs_df <- read.csv(text = getURL("https://raw.githubusercontent.com/chanthony/36315Group/master/Interactive/drug_consumption_personality.csv"))
+    
+    drugs_df$Usage <- mapvalues(drugs_df$Usage, from = c("CL0", "CL1", "CL2", "CL3", "CL4", "CL5", "CL6"),
+                                to = c("Never Used", "Used over a Decade Ago",
+                                       "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", "Used in Last Day"))
+    
+    drugs_df <- drugs_df[drugs_df$Education == input$Education,]
+    
+    #Extract all the drugs and traits
+    drugs <- colnames(temp_data)[14:32]
+    
+    p1 <- ggplot(drugs_df, aes(x = Drug, fill = Usage)) +
+      geom_bar(position = 'stack') +
+      labs(
+        y = 'Frequency',
+        title = 'Distribution of drug usage by education level'
+      )
+    
+    ggplotly(p1)
   })
   
 }
