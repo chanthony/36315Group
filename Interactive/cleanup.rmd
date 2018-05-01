@@ -63,3 +63,37 @@ data$Cscore <- as.numeric(data$Cscore)
 ```{r}
 write.csv(data, "drug_consumption_named.csv", row.names = FALSE)
 ```
+
+```{r}
+    drugs <- colnames(data)[14:32]
+    
+    temp_data <- data.frame(
+      Drug = character(),
+      Neuroticism = numeric(),
+      Extraversion = numeric(),
+      Openness = numeric(),
+      Agreeableness = numeric(),
+      Cscore = numeric(),
+      Usage = character()
+    )
+    
+    add_row <- function(x){
+      for(drug in drugs){
+        new_sample <- data.frame(
+          Drug = drug,
+          Neuroticism = x["Neuroticism"],
+          Extraversion = x["Extraversion"],
+          Openness = x["Openness"],
+          Agreeableness = x["Agreeableness"],
+          Cscore = x["Cscore"],
+          Usage = x[drug]
+        )
+        
+        temp_data <<- rbind(temp_data, new_sample)
+      }
+    }
+    
+    apply(data, MARGIN = 1, FUN = add_row)
+    
+write.csv(temp_data, "drug_consumption_personality.csv", row.names = FALSE)
+````

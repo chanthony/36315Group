@@ -1,5 +1,8 @@
 library(shiny)
 library(ggplot2)
+library(RCurl)
+library(dplyr)
+library(magrittr)
 
 function(input, output) {
   
@@ -8,6 +11,35 @@ function(input, output) {
   })
   
   data <- read.csv(file = "drug_consumption.csv", header = TRUE)
+  
+  output$rawPersonality <- renderPlot({
+    
+    used_recently <- c("CL3", "CL4", "CL5", "CL6")
+    
+    drugs_df <- read.csv(text = getURL("https://raw.githubusercontent.com/chanthony/36315Group/master/Interactive/drug_consumption_personality.csv"))
+    
+    drugs_df <- drugs_df[drugs_df$Usage %in% used_recently,]
+    
+    colnames(drugs_df)[6] <- "Conscientiousness"
+    
+    drugs_summary <- drugs_df %>% group_by(Drug) %>%
+      summarise(Neuroticism =  median(Neuroticism),
+                Extraversion = median(Extraversion),
+                Openness = median(Openness),
+                Agreeableness = median(Agreeableness),
+                Conscientiousness = median(Conscientiousness))
+    
+    p <- ggplot(drugs_df, aes(x = Drug, y = drugs_df[,input$trait])) +
+      #geom_point(alpha = 0.5) +
+      geom_jitter(width = 0.2, alpha = 0.2) +
+      geom_point(data = drugs_summary, aes_string(x = 'Drug', y = input$trait, size = '2'),
+                 color = 'red') +
+      theme(legend.title = element_blank()) +
+      scale_size_continuous(breaks = c(2),
+                          labels = c("Median Score"))
+  
+    p
+  })
   
   #Change plot name to match plot descrition e.g. output$drug_predicted
   output$plot <- renderPlot({#Each plot to be rendered in the UI
