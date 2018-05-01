@@ -86,7 +86,8 @@ write.csv(data, "drug_consumption_named.csv", row.names = FALSE)
           Openness = x["Openness"],
           Agreeableness = x["Agreeableness"],
           Cscore = x["Cscore"],
-          Usage = x[drug]
+          Usage = x[drug],
+          Education = x['Education']
         )
         
         temp_data <<- rbind(temp_data, new_sample)
