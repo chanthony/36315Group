@@ -401,4 +401,35 @@ function(input, output) {
     chartJSRadar(scores = values, labs = labs, maxScale = 7)
   })
   
+  output$gender_drugs <- renderPlot({
+    #Create a copy to avoid affecting other plots
+    temp_data <- data
+    
+    title = sprintf("Usage of %s by Gender", input$drug)
+    
+    #Extract only the relevant vector
+    drug_usage <- temp_data[,input$drug]
+
+    drug_usage <- mapvalues(drug_usage, from = c("CL0", "CL1", "CL2", "CL3", "CL4", "CL5", "CL6"),
+              to = c("Never Used", "Used over a Decade Ago",
+                     "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", "Used in Last Day"),
+              warn_missing = FALSE)
+    
+    p <- ggplot(temp_data, aes(x = factor(1), fill = drug_usage)) +
+      geom_bar(width = 1) +
+      facet_wrap( ~ Gender) +
+      coord_polar(theta = "y") +
+      theme_minimal() +
+      theme(
+        axis.title = element_blank(),
+        plot.title = element_text(hjust = 0.5)
+      ) +
+      labs(
+        title = title,
+        fill = "Usage"
+      )
+  
+    p
+  })
+  
 }

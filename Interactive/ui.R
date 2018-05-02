@@ -25,7 +25,9 @@ dashboardPage(
                menuSubItem("How Drugs are Consumed per Education Level",
                         tabName = "education_drugs"),
                menuSubItem("How Each Country Consumes Drugs",
-                           tabName = 'country_drugs')
+                           tabName = 'country_drugs'),
+               menuSubItem("How Drug Usage Varies by Gender", 
+                           tabName = 'gender_drugs')
       ),
       menuItem("How Personality Relates to\n
                Drug Usage", icon = icon("th"),
@@ -123,7 +125,8 @@ dashboardPage(
               fluidRow(
                 inputPanel(
                   selectInput('country_1', 'Pick First Country', levels(data$Country)),
-                  selectInput('country_2', 'Pick Second  Country', levels(data$Country))
+                  selectInput('country_2', 'Pick Second  Country', levels(data$Country),
+                              selected = 'USA')
                 )  
               ),
               fluidRow(
@@ -159,6 +162,19 @@ dashboardPage(
                               min = 1, max = 19, value = 10, step = 1)
                 ),
                 plotlyOutput("dendrogram")
+              )
+      ),
+      tabItem(tabName = 'gender_drugs',
+              fluidRow(
+                inputPanel(
+                  selectInput("drug", label = "Pick a drug",
+                              choices = colnames(data)[14:32])
+                )
+              ),
+              fluidRow(
+                box(
+                  plotOutput('gender_drugs')
+                )
               )
       )
     )
