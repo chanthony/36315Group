@@ -3,6 +3,7 @@ library(ggplot2)
 library(shinydashboard)
 library(dashboardthemes)
 library(plotly)
+library(radarchart)
 
 #IF you do not have dashboard themes installed run the following code:
 # library(devtools)
@@ -14,7 +15,6 @@ dataset <- diamonds
 data <- read.csv(file = "drug_consumption.csv", header = TRUE)
 
 dashboardPage(
-  
   dashboardHeader(title = "Caring Tan"),
   dashboardSidebar(
     width = 350,
@@ -23,13 +23,18 @@ dashboardPage(
       menuItem("Home", tabName = "home", icon = icon("dashboard")),
       menuItem("How Demographics Relates to Drug Usage", icon = icon("th"),
                menuSubItem("How Drugs are Consumed per Education Level",
-                        tabName = "education_drugs")
+                        tabName = "education_drugs"),
+               menuSubItem("How Each Country Consumes Drugs",
+                           tabName = 'country_drugs')
       ),
       menuItem("How Personality Relates to\n
                Drug Usage", icon = icon("th"),
         menuSubItem("How Raw Personality Scores Vary by Drug", tabName = 'rawPersonality'),
         menuSubItem("Correlation by Drug", tabName = "parallelPlot")
       ),
+      menuItem("How Drugs Relate with Each Other", icon = icon("th"),
+               menuSubItem("Correlating Drug Usage Levels", tabName = "drugxdrug"),
+               menuSubItem("Similarity of Drugs", tabName = 'drugclusters')),
       menuItem("How Similar Users Use Drugs", tabName = "regressionPlot")
     )
   ),
@@ -106,13 +111,54 @@ dashboardPage(
       tabItem(tabName = 'education_drugs',
               fluidRow(
                 box(
-                  selectInput('Education', 'Highest Level of Education Completed', levels(data$Education)),
-                  selectInput('focus_drug', 'Drug', colnames(data)[14:32])
+                  selectInput('Education', 'Highest Level of Education Completed', levels(data$Education))
                 )
               ),
               
               box(
-                plotlyOutput('education_and_drugs'), width = 10
+                plotlyOutput('education_and_drugs'), width = 12
+              )
+      ),
+      tabItem(tabName = 'country_drugs',
+              fluidRow(
+                inputPanel(
+                  selectInput('country_1', 'Pick First Country', levels(data$Country)),
+                  selectInput('country_2', 'Pick Second  Country', levels(data$Countryrun))
+                )  
+              ),
+              fluidRow(
+                box(
+                  chartJSRadarOutput("country_drugs", width = "450", height = "300")
+                )
+              )
+      ),
+      
+      tabItem(tabName = 'drugxdrug',
+              fluidPage(
+                inputPanel(
+                  selectInput("drug_1", label = "Pick a drug",
+                              choices = c("Alcohol", "Amphet", "Amyl", "Benzos", "Caff",
+                                          "Cannabis", "Choc", "Coke", "Crack", "Ecstasy", 
+                                          "Heroin", "Ketamine", "Legalh", "LSD", "Meth", 
+                                          "Mushrooms", "Nicotine", "Semer", "VSA"), 
+                              selected = "Alcohol"),
+                  selectInput("drug_2", label = "Pick another drug",
+                              choices = c("Alcohol", "Amphet", "Amyl", "Benzos", "Caff",
+                                          "Cannabis", "Choc", "Coke", "Crack", "Ecstasy", 
+                                          "Heroin", "Ketamine", "Legalh", "LSD", "Meth", 
+                                          "Mushrooms", "Nicotine", "Semer", "VSA"), 
+                              selected = "Cannabis")
+                ),
+                box(plotlyOutput("drugs_plot"), width = 12)
+              )
+      ),
+      tabItem(tabName = 'drugclusters',
+              fluidPage(
+                inputPanel(
+                  sliderInput("k_adjust", label = "Choose number of clusters",
+                              min = 1, max = 19, value = 10, step = 1)
+                ),
+                plotlyOutput("dendrogram")
               )
       )
     )

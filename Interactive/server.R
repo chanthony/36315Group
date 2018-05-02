@@ -5,6 +5,7 @@ library(dplyr)
 library(magrittr)
 library(plotly)
 library(plyr)
+library(radarchart)
 
 function(input, output) {
   
@@ -254,6 +255,7 @@ function(input, output) {
                 warn_missing = FALSE)
     }
     
+    
     drugs_df <- read.csv(text = getURL("https://raw.githubusercontent.com/chanthony/36315Group/master/Interactive/drug_consumption_personality.csv"))
     
     drugs_df$Usage <- mapvalues(drugs_df$Usage, from = c("CL0", "CL1", "CL2", "CL3", "CL4", "CL5", "CL6"),
@@ -273,6 +275,128 @@ function(input, output) {
       )
     
     ggplotly(p1)
+  })
+  
+  output$drugs_plot <- renderPlotly({
+    subset <- c("Alcohol", "Amphet", "Amyl", "Benzos", "Caff","Cannabis", 
+                "Choc", "Coke", "Crack", "Ecstasy", "Heroin", "Ketamine",
+                "Legalh", "LSD", "Meth", "Mushrooms", "Nicotine", "Semer",
+                "VSA")
+    drug_sub <- data[subset]
+    
+    f <- function(x){
+      mapvalues(x, from = c("CL0", "CL1", "CL2", "CL3", "CL4", "CL5", "CL6"),
+                to = c("Never Used", "Used over a Decade Ago",
+                       "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", "Used in Last Day"),
+                warn_missing = FALSE)
+    }
+    
+    drug_sub <- data.frame(apply(drug_sub, MARGIN = 2, FUN = f))
+    
+    heat <- ggplot(drug_sub, 
+                   aes_string(x = input$drug_1, y = input$drug_2)) +
+      geom_bin2d(binwidth = c(1, 1)) +
+      labs(title = sprintf("Correlation between %s and %s", 
+                           input$drug_1, input$drug_2),
+           x = input$drug_1,
+           y = input$drug_2) +
+      scale_fill_distiller(palette = "Greens", direction = -1)
+    ggplotly(heat)
+  })
+  
+  output$dendrogram <- renderPlotly({
+    subset <- c("Alcohol", "Amphet", "Amyl", "Benzos", "Caff","Cannabis", 
+                "Choc", "Coke", "Crack", "Ecstasy", "Heroin", "Ketamine",
+                "Legalh", "LSD", "Meth", "Mushrooms", "Nicotine", "Semer",
+                "VSA")
+    drug_sub <- data[subset]
+    
+    druggie <- drug_sub
+    
+    levels(druggie$Alcohol) <- 0:6
+    levels(druggie$Amphet) <- 0:6
+    levels(druggie$Amyl) <- 0:6
+    levels(druggie$Benzos) <- 0:6
+    levels(druggie$Caff) <- 0:6
+    levels(druggie$Cannabis) <- 0:6
+    levels(druggie$Choc) <- 0:6
+    levels(druggie$Coke) <- 0:6
+    levels(druggie$Crack) <- 0:6
+    levels(druggie$Ecstasy) <- 0:6
+    levels(druggie$Heroin) <- 0:6
+    levels(druggie$Ketamine) <- 0:6
+    levels(druggie$Legalh) <- 0:6
+    levels(druggie$LSD) <- 0:6
+    levels(druggie$Meth) <- 0:6
+    levels(druggie$Mushrooms) <- 0:6
+    levels(druggie$Nicotine) <- 0:6
+    levels(druggie$Semer) <- 0:6
+    levels(druggie$VSA) <- 0:6
+    
+    druggie <- t(druggie)
+    
+    dist_drug <- dist(druggie)
+    
+    library(dendextend)
+    dend <- dist_drug %>% hclust %>% as.dendrogram
+    
+    branch_pal <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
+    
+    dend %>%
+      set("branches_k_col", branch_pal, k = input$k_adjust) %>%
+      set("labels_cex", .5) %>%  
+      ggplot(horiz = FALSE, theme = NULL) +
+      theme(axis.text.x = element_blank(),
+            axis.ticks = element_blank()) +
+      labs(title = "Drug clustering", x = "Drugs", y = "Distance") +
+      theme_dendro()
+  })
+  
+  output$country_drugs <- renderPlot({
+    temp_data <- data
+    
+    temp_data <- temp_data[,c(5,14:32)]
+    
+    #Convert all the drug factor levels to something we can use
+    levels(temp_data$Alcohol) <- 0:6
+    levels(temp_data$Amphet) <- 0:6
+    levels(temp_data$Amyl) <- 0:6
+    levels(temp_data$Benzos) <- 0:6
+    levels(temp_data$Caff) <- 0:6
+    levels(temp_data$Cannabis) <- 0:6
+    levels(temp_data$Choc) <- 0:6
+    levels(temp_data$Coke) <- 0:6
+    levels(temp_data$Crack) <- 0:6
+    levels(temp_data$Ecstasy) <- 0:6
+    levels(temp_data$Heroin) <- 0:6
+    levels(temp_data$Ketamine) <- 0:6
+    levels(temp_data$Legalh) <- 0:6
+    levels(temp_data$LSD) <- 0:6
+    levels(temp_data$Meth) <- 0:6
+    levels(temp_data$Mushrooms) <- 0:6
+    levels(temp_data$Nicotine) <- 0:6
+    levels(temp_data$Semer) <- 0:6
+    levels(temp_data$VSA) <- 0:6
+    
+    temp_data[,2:20] <- data.frame(lapply(temp_data[,2:20], FUN = as.numeric))
+    
+    temp_data <- aggregate(temp_data[,2:20], list(temp_data$Country), median)
+    
+    colnames(temp_data)[1] <- 'Country'
+    
+    labs <- colnames(data)[14:32]
+    
+    temp_data$Country <- as.character(temp_data$Country)
+    
+    country_1_values <- temp_data[which(temp_data$Country == input$country_1), 2:20]
+    country_2_values <- temp_data[which(temp_data$Country == input$country_2), 2:20]
+    
+    values <- list(
+      country_1_values,
+      country_2_values
+    )
+    
+    chartJSRadar(scores = values, labs = labs, maxScale = 6)
   })
   
 }

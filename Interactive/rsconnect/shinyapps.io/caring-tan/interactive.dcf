@@ -5,6 +5,6 @@ account: caring-tan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 333652
-bundleId: 1349846
+bundleId: 1350631
 url: https://caring-tan.shinyapps.io/interactive/
-when: 1525200267.47933
+when: 1525228224.83806
