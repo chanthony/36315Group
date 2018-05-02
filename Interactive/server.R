@@ -300,7 +300,7 @@ function(input, output) {
                            input$drug_1, input$drug_2),
            x = input$drug_1,
            y = input$drug_2) +
-      scale_fill_distiller(palette = "Greens", direction = -1)
+      scale_fill_gradient(low = "#fee8c8", high = "#e34a33")
     ggplotly(heat)
   })
   
