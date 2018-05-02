@@ -352,7 +352,7 @@ function(input, output) {
       theme_dendro()
   })
   
-  output$country_drugs <- renderPlot({
+  output$country_drugs <- renderChartJSRadar({
     temp_data <- data
     
     temp_data <- temp_data[,c(5,14:32)]
@@ -388,15 +388,17 @@ function(input, output) {
     
     temp_data$Country <- as.character(temp_data$Country)
     
-    country_1_values <- temp_data[which(temp_data$Country == input$country_1), 2:20]
-    country_2_values <- temp_data[which(temp_data$Country == input$country_2), 2:20]
+    #input <- list(country_1 = 'USA', country_2 = 'UK')
     
-    values <- list(
-      country_1_values,
-      country_2_values
-    )
+    country_1_values <- as.numeric(as.vector(temp_data[which(temp_data$Country == input$country_1), 2:20]))
+    country_2_values <- as.numeric(as.vector(temp_data[which(temp_data$Country == input$country_2), 2:20]))
     
-    chartJSRadar(scores = values, labs = labs, maxScale = 6)
+    values <- list(country_1_values, country_2_values)
+    
+    
+    names(values) <- c(input$country_1, input$country_2)
+    
+    chartJSRadar(scores = values, labs = labs, maxScale = 7)
   })
   
 }

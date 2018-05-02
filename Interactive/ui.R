@@ -123,7 +123,7 @@ dashboardPage(
               fluidRow(
                 inputPanel(
                   selectInput('country_1', 'Pick First Country', levels(data$Country)),
-                  selectInput('country_2', 'Pick Second  Country', levels(data$Countryrun))
+                  selectInput('country_2', 'Pick Second  Country', levels(data$Country))
                 )  
               ),
               fluidRow(
