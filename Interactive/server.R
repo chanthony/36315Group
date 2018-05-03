@@ -6,6 +6,8 @@ library(magrittr)
 library(plotly)
 library(plyr)
 library(radarchart)
+library(reshape2)
+library(d3heatmap)
 
 function(input, output) {
   
@@ -118,7 +120,7 @@ function(input, output) {
         cur_cor <- cor(temp_data[[drug]], temp_data[[trait]])
         alpha <- 0.2
         if(drug == input$focus_drug){
-          alpha <- 0.7
+          alpha <- 0.8
         }
         drugs_df <- rbind(drugs_df, data.frame("Drug"=drug, "trait"=trait,
                                                "cor"=cur_cor, alpha = alpha))
@@ -126,7 +128,7 @@ function(input, output) {
     }
     
     
-    p <- ggplot(drugs_df, aes(x = trait, y = cor, group = Drug)) +
+    p <- ggplot(drugs_df, aes(x = trait, y = cor, group = Drug, color = Drug)) +
       geom_path(aes(size = 1.5, alpha = alpha)) +
       theme(legend.position = "none") +
       geom_hline(yintercept = 0, linetype = "dashed") +
@@ -137,7 +139,7 @@ function(input, output) {
       )
     
     p
-  }, width = 1000, height = 700)
+  }, width = 800, height = 400)
   
   output$regression_plot <- renderPlot({
     #Make a copy of the data
@@ -224,7 +226,7 @@ function(input, output) {
     }
     
     p <- ggplot(predicted_df, aes(x = Drug, y = usage)) +
-      geom_bar(stat = "identity", alpha = 0.5) +
+      geom_bar(stat = "identity", alpha = 0.5, aes(fill = Drug)) +
       geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.5) +
       scale_y_continuous(breaks = 0:6, labels = c('Never', 'Over a Decade Ago', 'In Last Decade',
                                   'In Last Year', 'In Last Month', 'In Last Week',
@@ -277,31 +279,35 @@ function(input, output) {
     ggplotly(p1)
   })
   
-  output$drugs_plot <- renderPlotly({
+  output$drugs_plot <- renderD3heatmap({
     subset <- c("Alcohol", "Amphet", "Amyl", "Benzos", "Caff","Cannabis", 
                 "Choc", "Coke", "Crack", "Ecstasy", "Heroin", "Ketamine",
                 "Legalh", "LSD", "Meth", "Mushrooms", "Nicotine", "Semer",
                 "VSA")
     drug_sub <- data[subset]
     
+    #f <- function(x){
+    #  mapvalues(x, from = c("CL0", "CL1", "CL2", "CL3", "CL4", "CL5", "CL6"),
+    #            to = c("Never Used", "Used over a Decade Ago",
+    #                   "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", "Used in Last Day"),
+    #            warn_missing = FALSE)
+    #}
+    
     f <- function(x){
       mapvalues(x, from = c("CL0", "CL1", "CL2", "CL3", "CL4", "CL5", "CL6"),
-                to = c("Never Used", "Used over a Decade Ago",
-                       "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", "Used in Last Day"),
-                warn_missing = FALSE)
+                to = 0:6, warn_missing = FALSE)
     }
     
     drug_sub <- data.frame(apply(drug_sub, MARGIN = 2, FUN = f))
     
-    heat <- ggplot(drug_sub, 
-                   aes_string(x = input$drug_1, y = input$drug_2)) +
-      geom_bin2d(binwidth = c(1, 1)) +
-      labs(title = sprintf("Correlation between %s and %s", 
-                           input$drug_1, input$drug_2),
-           x = input$drug_1,
-           y = input$drug_2) +
-      scale_fill_gradient(low = "#fee8c8", high = "#e34a33")
-    ggplotly(heat)
+    drug_sub <- data.frame(lapply(drug_sub, FUN = as.numeric))
+    
+    cormat <- round(cor(drug_sub),2)
+    melted_cormat <- melt(cormat)
+    head(melted_cormat)
+    
+    
+    d3heatmap(cormat, scale = 'column', colors = 'RdYlGn')
   })
   
   output$dendrogram <- renderPlotly({
