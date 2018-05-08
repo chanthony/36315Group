@@ -1,0 +1,129 @@
+---
+title: "36-315 Statistical Graphics and Visualization"
+author: "**Caring Tan**: Anthony Chan (alc1), Minwhan Cho(minwhanc), Eric Huang (erichuan), Jae Won Yoon (jaewony)"
+date: "May 11th, 2018"
+output: html_document
+---
+
+
+## Written Overview of Interactive Graphics Project
+
+***
+
+### Introduction:
+
+- In this application, we analyze the different factors that may play into drug usage in individuals and the nature of their various relationships. Our analysis is based on the dataset used in the paper titled "The Five Factor Model of personality and evaluation of drug consumption risk" (Fehrman et al., 2015). The dataset contains records for 1,885 respondents. Each record contains an individual's basic demographics (level of education, age, gender, country of residence and ethnicity), personality measurements (neuroticism, extraversion, openness to experience, agreeableness, conscientiousness, impulsivity, and sensation seeking), and frequency of drug usage by drug. The dataset contains usage data for the following drugs: alcohol, amphetamines, amyl nitrite, benzodiazepine, cannabis, chocolate, cocaine, caffeine, crack, ecstasy, heroin, ketamine, legal highs, LSD, methadone, mushrooms, nicotine, and semeron.
+
+- Dataset: **UCI Drug Consumption (quantified) Data Set (2016)**
+- Dataset URL: https://archive.ics.uci.edu/ml/datasets/Drug+consumption+%28quantified%29
+- Link to Shiny App: https://caring-tan2.shinyapps.io/interactive/
+
+
+***
+
+### Graph Descriptions and Design Choices.
+
+***
+
+#### **I. How Demographics Relate to Drug Usage**
+
+We created three different graphs with plotly and shiny to depict drug usage levels for three main demographic features from our dataset: education level, country, and gender.
+
+##### 1. How Drugs are Consumed per Education Level
+
+- This is a stacked bar chart that illustrates the respondents usage for each drug and how recently they consumed those drugs. The graph only contains the data for respondents of the selected education level. Each bar represents a single drug and each color in that bar represents how recently each respondent reported using that certain drug. We chose a stacked bar chart to illustrate all the drug usage periods with one graph. This choice was preferred to facetting by usage levels because we decided it was unnecesary to have six separate bar charts.
+
+##### 2. How Each Country Consumes Drugs
+
+- With these polar coordinates, we depicted the median used period for all types of drugs. Red lines and dots indicate the scores of the first country, blue the second. With this polar chart made by plotly, we can check the median scores for both countries by dragging the cursor on a certain point. Thus, this is easy and simple for comparison since we have 18 different types of drugs. With this graph, we can observe the most frequently used drug for each country. Also, we can compare and contrast drug usage by geography and demographics as well.
+
+##### 3. How Drug Usage Varies by Gender
+
+- We created a pie chart and facetted by gender to compare drug usage levels between gender.	A pie chart seemed suited to add variety and facility to our visuals. Because there are only two main variable that need to compared (M/F), facetting was the simplest method to depict drug usage by gender. We can use this graph to compare drug usage levels based on their classification (is it a hard drug or non-hard drug?). However, from the pie chart, we observe the distribution of drug usage for men and women are in general not that much different.
+
+
+##### Observations Based on the Graphs
+
+1) Individuals with **higher education levels** tend to show lower frequency in drug usage and have tried less variety of drugs that are illegal such as cocaine and heroin. Regardless of education level, legal drugs such as alcohol, caffeine, and chocolate.
+2) **All countries** seem to have a similar and high consumption rate of common legal substances like alcohol and caffeine. Also, Cannabis consumption is highest in the US, a country that has constant talks of legalization.
+3) **USA** showed the highest consumption rate of all kinds of drugs, both legal and illegal, than any other countries, when, on the other hand, **UK** had the lowest.
+4) **New Zealand¡¯s** consumption rate of Amyl Nitrate (a.k.a. ¡°Poppers¡±) was much higher than that of United States. Considering that ¡°poppers¡± is widely used within gay community, and New Zealand precedes USA in terms of acceptance and openness to homosexuality, we believe there may be a correlation.
+5) However, some drugs have **higher percentage of male users than female users**. For example, cocaine, ecstasy, meth, all of which fall under the category of amphetamines, have more male users than female users.
+6) If we observe the classification of each drug, ¡°harder¡± drugs such as heroin and meth have a much greater percentage of **people who have never used that drug** for both genders.
+
+
+***
+
+#### **II. How Personality Relates to Drug Usage**
+
+From our dataset, we were able to compare drug usage levels for respondents with 5 different personality traits: neuroticism, extraversion, openness, agreeableness, conscientiousness.
+
+##### 1. How Raw Personality Scores Vary by Drug
+
+- This is a scatterplot of personality traits scores and drug usage jittered slightly to observe the different scores for every drug. This information is from drug users who are associated with the 5 categorized personality traits above. The large red dots indicate the median score for each drug. A slight jitter was necessary to avoid unnecessary cluttering and we intentionally made the median score dot conspicuous for convenience. Through this plot, we can see the different drug usage preferences for people with different personality traits.
+
+##### 2. Correlation by Drug
+
+- This is a plot showing the relationship of the correlations of different personality scores with drug usage levels. When the user chooses a certain drug, he or she sees the mapped lines highlighted for that certain drug. The lines for the relations between different personalities are connected. With this plot, we can begin to make basic guesses about how the different personality types consume drugs.
+
+##### Observations Based on the Graphs
+
+1) Users of amphetamines, benzos, crack, heroin, meth showed higher score in **neuroticism** than those of other drugs; they tend to have more nervous temperament.
+2)	Users of alcohol, amyl, coke, ecstasy, ketamine, LSD, mushrooms are more **extraverted** than those of others.
+3)	Interestingly (or obviously), users of illegal substances showed higher score in **openness** than those of legal substances (alcohol, caffeine, chocolate, and nicotine).
+4)	On the other hand, users of legal substances showed higher score in **agreeableness**, which correlates with one¡¯s empathetic ability, than those of illegal substances.
+5)	Users of legal substances showed higher score in **conscientiousness** than those of illegal substances; legal-users are more conscientious than illegal-users.
+
+***
+
+#### **III. How Drugs Relate to Each Other**
+
+From our data set, we wanted to see the correlations of drugs to one another. Furthermore, we wanted to observe and find patterns of similar drugs based on a category.
+
+##### 1. Correlating Drug Usage Levels
+
+- This heat map displays the correlation between respondents' usage of two pairs of drugs. Within each correlation, users can observe whether the usage of those two drugs are showing relative similarity or difference through their correlation. The goal of this graph is to see whether the usage pattern for one particular drug has an effect on the usage pattern of a different drug. For example, if for two drugs the correlation is very high, that may suggest that usage of one drug has a positive effect on usage of another drug and vice versa for very negative correlations. We used a heat map with easily an  identifiable color green notifying the highest correlation and orange the lowest.
+
+##### 2. Similarity of Drugs
+
+- Based on the correlation between respondents' usage of different types of drugs, drugs that show high similarity in usage frequency and tendency can be grouped into the same cluster. When the user chooses the number of clusters from 1 to 19, the following graph will display the dendrogram of the similarity of drugs. By looking at the clustering, we can observe which drugs tend to have the same usage pattern and identify relationships between certain drugs. Grouping the drugs with a dendrogram seemed appropriate since we only have 18 different types of drugs, an easily quantifiable number.
+
+##### Observations Based on Graphs
+
+1)	When divided into two clusters, alcohol, caffeine, chocolate, cannabis and nicotine are in the same cluster. All these substances are **legal**, except cannabis; however, notice that cannabis is in the process of legalization.
+2)	Drugs known to have **similar effects** show high correlation with one another. For example, two well-known psychedelic drugs, LSD and Mushrooms, are in the same cluster even when we set the number of cluster to be higher than ten.
+3)	Drugs that are notorious for their **high addictiveness and lethality** such as VSA, heroin, and crack tend to be in the same cluster.
+4)	**Illegal but widely well-known drugs**, Cocaine and Ecstasy tend to be in the same cluster as well; probably because both of them are easily-accessible.
+
+***
+
+#### **IIII. How Similar Users Use Drugs**
+
+- We included a simple tool to see how users interact with drugs. As its inputs, it only needs basic demographic information. Additionally, it asks for some information about your personality. The five categories the personality traits described above. Then, we created a bar plot that shows how recently similar users have used each drug and error bars that show the range that similar users could fall into.
+
+- This was an interactive design that we included for users to have fun and see drug preferenes of drug users with similar personality traits. However, this is just a predictor based on information in our data set, and it is not a statement about individuals.
+
+***
+
+### Conclusion
+
+- Based on demographics, personality and drug correlations, we can conclude that all these factors affect drug usage. In terms of demographics, different education levels, countris and gender, to some extent, have different drug habits. Personality-wise, people with certain traits prefer certain types of drugs mainly based on effect and legality. Finally, by grouping certain drugs with one another, we were able to identify similarities in drug usage patterns and make observations. Therefore, we conclude that a myriad of factors affect drug usage patterns in individuals.
+
+***
+
+### Appendix
+
+* Reordered education option levels in Graph 1
+* Changed color scheme for graph 2 to be color blind friendly
+    * Attempted to remove axis labels in the radarchart but the radarchart library used did not have a robust way of doing this.
+* Increased pie chart size for graph 3 to be more consistent with size of other graphs.
+* Tilted axis labels in graph 4 to avoid overlap
+* Descreased median point size in graph 4 to be less obtrusive.
+* Enhanced alpha contrast between selected drug and other drugs in graph 5 to better emphasize selection.
+* Increased axis label and title size to be more readable in grpah 5
+* Tilted x axis labels in graph 6(heatmap) to avoid overlap
+* Increased axis label sizes in graph 6 to be more readable
+* Removed confusing legend in graph 7(dendrogram)
+
+***
+
