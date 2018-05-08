@@ -1,0 +1,12 @@
+name: interactive
+title:
+username:
+account: caring-tan2
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 337930
+bundleId: 1361461
+url: https://caring-tan2.shinyapps.io/interactive/
+when: 1525745075.61525
+asMultiple: FALSE
+asStatic: FALSE

@@ -153,7 +153,8 @@ dashboardPage(
       tabItem(tabName = 'education_drugs',
               fluidRow(
                 box(title = "Input", status = "primary", solidHeader = TRUE,
-                  selectInput('Education', 'Highest Level of Education Completed', levels(data$Education))
+                  selectInput('Education', 'Highest Level of Education Completed',
+                              c("<16", "16", "17", "18","Some College","University Degree", 'Trade School', "Masters", "PhD"))
                 )
               ),
               
@@ -179,7 +180,7 @@ dashboardPage(
               ),
               fluidRow(
                 box(
-                  chartJSRadarOutput("country_drugs", width = "450", height = "300")
+                  chartJSRadarOutput("country_drugs", width = "550", height = "400")
                 ),
                 column(width = 6,
                   box(title = "Instructions", status = "warning", solidHeader = TRUE,
@@ -228,25 +229,24 @@ dashboardPage(
       tabItem(tabName = 'gender_drugs',
               fluidRow(
                 box(title = "Input", status = "primary", solidHeader = TRUE,
-                  selectInput("drug", label = "Pick a drug",
-                              choices = colnames(data)[14:32])
+                    width = 12,
+                    selectInput("drug", label = "Pick a drug",
+                                choices = colnames(data)[14:32])
                 )
               ),
               fluidPage(
-                box(
+                box(width = 12,
                   plotOutput('gender_drugs')
                 ),
-                column(width = 6,
-                  box(title = "Instructions", status = "warning", solidHeader = TRUE,
+                box(title = "Instructions", status = "warning", solidHeader = TRUE,
                     "Pick a drug and observe the usage of the drug in the past year for both genders."
                   ),
-                  box(title = "Description", status = "warning", solidHeader = TRUE,
+                box(title = "Description", status = "warning", solidHeader = TRUE,
                       'From the pie chart, we observe that for some drugs, men and women do not have much difference
                       s in usage time periods. However, some drugs have higher percentage of male users than female users
                       . For example, cocaine, ecstasy, meth, all of which fall under the category of amphetamines,
                       have more male users than female users. Also, if we observe the classification of each drug,
                       "harder" drugs have a much greater percentage of people who have never used that drug for both genders.')
-                )
               )
       )
     )

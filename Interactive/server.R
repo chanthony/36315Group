@@ -39,9 +39,10 @@ function(input, output) {
     p <- ggplot(drugs_df, aes(x = Drug, y = drugs_df[,input$trait])) +
         #geom_point(alpha = 0.5) +
         geom_jitter(width = 0.2, alpha = 0.2) +
-        geom_point(data = drugs_summary, aes(x = drugs_summary$Drug, y = drugs_summary[,input$trait], size = 1.5),
+        geom_point(data = drugs_summary, aes(x = drugs_summary$Drug, y = drugs_summary[,input$trait], size = 1),
                    color = 'red') +
-        theme(legend.title = element_blank()) +
+        theme(legend.title = element_blank(),
+              axis.text.x = element_text(angle = 45)) +
         scale_size_continuous(breaks = c(2),
                             labels = c("Median Score")) +
         labs(
@@ -120,7 +121,7 @@ function(input, output) {
         cur_cor <- cor(temp_data[[drug]], temp_data[[trait]])
         alpha <- 0.2
         if(drug == input$focus_drug){
-          alpha <- 0.8
+          alpha <- 1
         }
         drugs_df <- rbind(drugs_df, data.frame("Drug"=drug, "trait"=trait,
                                                "cor"=cur_cor, alpha = alpha))
@@ -130,7 +131,9 @@ function(input, output) {
     
     p <- ggplot(drugs_df, aes(x = trait, y = cor, group = Drug, color = Drug)) +
       geom_path(aes(size = 1.5, alpha = alpha)) +
-      theme(legend.position = "none") +
+      theme(legend.position = "none",
+            axis.text = element_text(size = 12),
+            axis.title = element_text(size = 15)) +
       geom_hline(yintercept = 0, linetype = "dashed") +
       labs(
         x = "Personality Trait",
@@ -236,7 +239,7 @@ function(input, output) {
         title = 'Predicted Usage by Drug'
       ) +
       theme(
-        axis.text.x = element_text(size = 14),
+        axis.text.x = element_text(size = 14, angle = 45, vjust = 0.5),
         axis.text.y = element_text(size = 14),
         axis.title.x = element_text(face = 'bold', size = 14),
         axis.title.y = element_text(face = 'bold', size = 14)
@@ -307,7 +310,7 @@ function(input, output) {
     head(melted_cormat)
     
     
-    d3heatmap(cormat, scale = 'column', colors = 'RdYlGn')
+    d3heatmap(cormat, scale = 'column', colors = 'RdYlGn', yaxis_font_size = "15pt", yaxis_width = 140)
   })
   
   output$dendrogram <- renderPlotly({
@@ -350,12 +353,13 @@ function(input, output) {
     
     dend %>%
       set("branches_k_col", branch_pal, k = input$k_adjust) %>%
-      set("labels_cex", .5) %>%  
+      set("labels_cex", 0.8) %>%  
       ggplot(horiz = FALSE, theme = NULL) +
+      theme_dendro() +
       theme(axis.text.x = element_blank(),
-            axis.ticks = element_blank()) +
-      labs(title = "Drug clustering", x = "Drugs", y = "Distance") +
-      theme_dendro()
+            axis.ticks = element_blank(),
+            legend.position = 'none') +
+      labs(title = "Drug clustering", x = "Drugs", y = "Distance")
   })
   
   output$country_drugs <- renderChartJSRadar({
@@ -404,7 +408,9 @@ function(input, output) {
     
     names(values) <- c(input$country_1, input$country_2)
     
-    chartJSRadar(scores = values, labs = labs, maxScale = 7)
+    col_mat <- matrix(c(239,138,98, 103,169,207), nrow = 3, byrow = FALSE)
+    
+    chartJSRadar(scores = values, labs = labs, maxScale = 7, colMatrix = col_mat)
   })
   
   output$gender_drugs <- renderPlot({
@@ -428,7 +434,10 @@ function(input, output) {
       theme_minimal() +
       theme(
         axis.title = element_blank(),
-        plot.title = element_text(hjust = 0.5)
+        plot.title = element_text(hjust = 0.5, size = 15, face = 'bold'),
+        strip.text = element_text(size = 15),
+        legend.title = element_text(size = 15, face = 'bold'),
+        legend.text = element_text(size = 13)
       ) +
       labs(
         title = title,
